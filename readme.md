@@ -12,19 +12,36 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 1. 创建项目结构
+
+```bash
+mkdir 简易聊天室
+cd 简易聊天室
+mkdir templates
+mkdir -p static/js
+```
+
+### 2. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 运行应用
+### 3. 创建文件
+
+将对应的代码保存到以下文件中：
+- `app.py` - Flask 主应用
+- `templates/index.html` - 聊天室页面  
+- `static/js/chat.js` - JavaScript 代码
+- `requirements.txt` - 依赖包列表
+
+### 4. 运行应用
 
 ```bash
 python app.py
 ```
 
-### 3. 访问聊天室
+### 5. 访问聊天室
 
 打开浏览器访问：`http://localhost:5000`
 
@@ -35,8 +52,11 @@ python app.py
 ├── app.py              # Flask 主应用
 ├── requirements.txt    # 依赖包列表
 ├── README.md          # 使用说明
-└── templates/
-    └── index.html     # 聊天室页面
+├── templates/
+│   └── index.html     # 聊天室页面
+└── static/
+    └── js/
+        └── chat.js    # 聊天室 JavaScript 代码
 ```
 
 ## 使用方法
@@ -79,6 +99,8 @@ python app.py
 - 私聊功能
 - 消息表情包
 - 文件分享
+
+
 
 ---
 
