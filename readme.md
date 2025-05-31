@@ -12,13 +12,10 @@
 
 ## 快速开始
 
-### 1. 创建项目结构
+### 1. 進入目錄
 
 ```bash
-mkdir 简易聊天室
-cd 简易聊天室
-mkdir templates
-mkdir -p static/js
+cd project-dir
 ```
 
 ### 2. 安装依赖
