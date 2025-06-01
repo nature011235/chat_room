@@ -56,7 +56,28 @@ def handle_connect():
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    print('用户断开连接')
+    if request.sid in online_users:
+        user_info = online_users[request.sid]
+        username = user_info['username']
+        room = user_info.get('room', 'general')
+        
+        # 移除用户
+        del online_users[request.sid]
+        
+        # 通知其他用户有用户离开
+        emit('user_left', {
+            'username': username,
+            'message': f'{username} 離開了聊天室',
+            'time': datetime.now().strftime('%H:%M:%S')
+        }, room=room)
+        
+        # 广播更新的在线用户列表
+        broadcast_online_users(room)
+        
+        print(f'{username} 离开了房间 {room}')
+    else:
+        print('用户断开连接')
+
 
 @socketio.on('join')
 def handle_join(data):
@@ -79,8 +100,23 @@ def handle_join(data):
         'message': f'{username} 加入了聊天室',
         'time': datetime.now().strftime('%H:%M:%S')
     }, room=room)
-    
+    broadcast_online_users(room)
     print(f'{username} 加入了房间 {room}')
+
+def broadcast_online_users(room):
+    """广播在线用户列表"""
+    users_in_room = []
+    for sid, user_info in online_users.items():
+        if user_info.get('room') == room:
+            users_in_room.append({
+                'username': user_info['username'],
+                'user_id': user_info['user_id']
+            })
+    
+    socketio.emit('online_users_update', {
+        'users': users_in_room,
+        'count': len(users_in_room)
+    }, room=room)
 
 @socketio.on('send_message')
 def handle_message(data):

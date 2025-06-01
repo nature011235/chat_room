@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>祕密聊天室</title>
+    <title>chattt</title>
     <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body>
     <div class="chat-container">
+        <div class="online-counter hidden" id="onlineCounter" onclick="toggleUsersPanel()">
+            <span id="onlineCount">0</span> 
+        </div>
+
         <div class="chat-header" id="chat-header">
             <h1>CHAT</h1>
             <div class="online-status">online</div>
@@ -35,7 +39,16 @@
             <div class="drag-hint">拖曳圖片到此處發送</div>
         </div>
     </div>
-
+    <div class="users-panel-overlay" id="usersPanelOverlay" onclick="closeUsersPanel()"></div>
+    <div class="users-panel" id="usersPanel">
+        <div class="users-panel-header">
+            <h3 class="users-panel-title">在線用戶</h3>
+            <button class="users-panel-close" onclick="closeUsersPanel()">&times;</button>
+        </div>
+        <div class="users-list" id="usersList">
+            <!-- 用户列表将通过JavaScript动态生成 -->
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="static/js/chat.js"></script>
 </body>

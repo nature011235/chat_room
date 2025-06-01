@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+
 * {
     margin: 0;
     padding: 0;
@@ -554,6 +554,187 @@ body {
 
 .message.other:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 在线用户相关样式 */
+.online-counter {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 100;
+}
+#onlineCount {
+    color: black;
+}
+.online-counter:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.online-counter::before {
+    content: '👥';
+    font-size: 0.75rem;
+}
+
+/* 用户列表滑出面板 */
+.users-panel {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.users-panel.active {
+    left: 0;
+}
+
+.users-panel-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.users-panel-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.users-panel-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.users-panel-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.users-list {
+    flex: 1;
+    padding: 20px 0;
+    overflow-y: auto;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    transition: background 0.2s ease;
+}
+
+.user-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-right: 12px;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.user-status {
+    font-size: 0.75rem;
+    color: #10b981;
+    margin: 2px 0 0 0;
+}
+
+.user-status::before {
+    content: '●';
+    margin-right: 4px;
+}
+
+/* 面板背景遮罩 */
+.users-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.users-panel-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .users-panel {
+        width: 280px;
+        left: -280px;
+    }
+    
+    .online-counter {
+        top: 15px;
+        left: 15px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-panel {
+        width: 100%;
+        left: -100%;
+    }
 }
 
 /* 拖拽提示样式 */
