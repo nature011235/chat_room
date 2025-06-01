@@ -146,3 +146,19 @@ python app.py
 * ✅ 有視覺化的測試結果
 
 想要我幫你設計具體的測試計畫嗎？或是你比較想專注在哪個測試面向？
+
+
+# 方式1：一键运行（推荐）
+python tests/run_all_tests.py
+
+# 方式2：快速测试
+python tests/run_all_tests.py --quick
+
+# 方式3：指定测试类型
+python tests/run_all_tests.py --backend     # 后端测试
+python tests/run_all_tests.py --ui          # UI测试
+python tests/run_all_tests.py --performance # 性能测试
+python tests/run_all_tests.py --security    # 安全测试
+
+# 方式4：直接用pytest
+pytest tests/

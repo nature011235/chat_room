@@ -149,7 +149,7 @@ def handle_message(data):
     
     # 存储消息（最多保留100条）
     chat_messages.append(msg_data)
-    if len(chat_messages) > 100:
+    if(len(chat_messages) > 100):
         chat_messages.pop(0)
     
     # 广播消息给房间内所有用户
