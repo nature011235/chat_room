@@ -6,13 +6,13 @@ tests 裡面是現在的測試 tests_backup是比較複雜的測試 可以去裡
 
 主要就4個元件
 
-* **test_backend  /  [tests_backup] test_chat_app**
+* **test_backend  /  [tests_backup] test_chat_app** \
 測後端server：app.py
-* **test_frontend /  [tests_backup] test_selenium_ui**
+* **test_frontend /  [tests_backup] test_selenium_ui**\
 測前端網頁
-* **test_performance**
+* **test_performance**\
 測效能
-* **test_security**
+* **test_security**\
 測安全
 
 ---
@@ -30,17 +30,17 @@ run server
 python app.py
 ```
 
-### 方式1：一键运行（推荐）
+### 方式1：一次跑全部
 ```bash
 python tests/run_all_tests.py
 ```
 
-### 方式2：快速测试
+### 方式2：快速測試
 ```bash
 python tests/run_all_tests.py --quick
 ```
 
-### 方式3：指定测试类型
+### 方式3：指定測試類型
 ```bash
 python tests/run_all_tests.py --backend     # 后端测试
 python tests/run_all_tests.py --ui          # UI测试
