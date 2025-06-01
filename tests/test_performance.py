@@ -1,4 +1,4 @@
-# tests/test_performance.py - 性能测试
+# tests/test_performance.py - 性能测试（修复版本）
 import pytest
 import time
 import threading
@@ -22,19 +22,25 @@ class TestConcurrentUsers:
         messages_sent = 0
         
         try:
-            # 创建客户端
-            sio = socketio.SimpleClient()
+            print(f"用户{user_id} 开始连接...")
+            
+            # 创建客户端 - 修复版本
+            sio = socketio.Client()  # 使用 Client() 而不是 SimpleClient()
             
             # 连接服务器
             start_time = time.time()
             sio.connect(server_url)
             connect_time = time.time() - start_time
             
+            print(f"用户{user_id} 连接成功，耗时 {connect_time:.3f}秒")
+            
             # 加入聊天室
             sio.emit('join', {
                 'username': username,
                 'room': 'general'
             })
+            
+            print(f"用户{user_id} 已加入聊天室")
             
             # 发送消息
             for i in range(message_count):
@@ -46,10 +52,13 @@ class TestConcurrentUsers:
                 messages_sent += 1
                 time.sleep(random.uniform(0.1, 0.3))  # 随机延迟
             
+            print(f"用户{user_id} 发送了 {messages_sent} 条消息")
+            
             # 保持连接一段时间
             time.sleep(random.uniform(1, 2))
             
             sio.disconnect()
+            print(f"用户{user_id} 断开连接")
             
             return {
                 'user_id': user_id,
@@ -60,6 +69,8 @@ class TestConcurrentUsers:
             }
             
         except Exception as e:
+            print(f"❌ 用户{user_id} 失败: {e}")
+            print(f"   错误类型: {type(e).__name__}")
             return {
                 'user_id': user_id,
                 'username': username,
@@ -137,7 +148,7 @@ class TestMessageThroughput:
         """测试消息发送速度"""
         print("\n测试消息发送速度...")
         
-        sio = socketio.SimpleClient()
+        sio = socketio.Client()  # 修复：使用 Client()
         sio.connect(server_url)
         
         # 加入聊天室
@@ -179,7 +190,7 @@ class TestConnectionStability:
         """测试长连接稳定性"""
         print("\n测试长连接稳定性（30秒）...")
         
-        sio = socketio.SimpleClient()
+        sio = socketio.Client()  # 修复：使用 Client()
         sio.connect(server_url)
         
         # 加入聊天室
@@ -227,7 +238,7 @@ class TestResponseTime:
         response_times = []
         
         for i in range(5):  # 测试5次
-            sio = socketio.SimpleClient()
+            sio = socketio.Client()  # 修复：使用 Client()
             
             start_time = time.time()
             sio.connect(server_url)

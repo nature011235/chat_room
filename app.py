@@ -4,6 +4,7 @@ from datetime import datetime
 import uuid
 import base64
 import imghdr
+import html
 
 app = Flask(__name__)
 app.secret_key = 'simple_chat_secret_key'
@@ -128,7 +129,14 @@ def handle_message(data):
     room = user_info.get('room', 'general')
     message = data.get('message', '')
     message_type = data.get('type', 'text')  # 'text' 或 'image'
-    
+
+    MAX_MESSAGE_LENGTH = 500
+    if message_type == 'text' and len(message) > MAX_MESSAGE_LENGTH:
+        emit('error', {'message': f'消息太长，最多{MAX_MESSAGE_LENGTH}字符'})
+        return
+
+    if message_type == 'text':
+        message = html.escape(message) 
     # 创建消息对象
     msg_data = {
         'username': username,
