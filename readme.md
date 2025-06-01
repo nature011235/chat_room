@@ -42,10 +42,10 @@ python tests/run_all_tests.py --quick
 
 ### 方式3：指定測試類型
 ```bash
-python tests/run_all_tests.py --backend     # 后端测试
-python tests/run_all_tests.py --ui          # UI测试
-python tests/run_all_tests.py --performance # 性能测试
-python tests/run_all_tests.py --security    # 安全测试
+python tests/run_all_tests.py --backend     # 後端測試
+python tests/run_all_tests.py --ui          # UI測試
+python tests/run_all_tests.py --performance # 性能測試
+python tests/run_all_tests.py --security    # 安全測試
 ```
 
 ---
