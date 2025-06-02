@@ -1,5 +1,9 @@
-const socket = io();
-window.socket = socket; 
+const socket = io({
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
+});
+window.socket = socket;
 let currentUsername = '';
 let isConnected = false;
 let typingTimer;
@@ -40,7 +44,7 @@ function initializeElements() {
     usersPanelOverlay = document.getElementById('usersPanelOverlay');
     usersList = document.getElementById('usersList');
     window.chatContainer = document.querySelector('.chat-container');
-    typingIndicator.style.display='none';
+    typingIndicator.style.display = 'none';
 }
 
 // 加入聊天
@@ -72,7 +76,7 @@ function joinChat() {
         chatheader.classList.add('hidden');
         messageContainer.classList.remove('hidden');
         messagesDiv.classList.remove('hidden');
-        onlineCounter.classList.remove('hidden'); 
+        onlineCounter.classList.remove('hidden');
         if (messageInput) {
             messageInput.focus();
         }
@@ -86,7 +90,7 @@ function sendMessage() {
     const message = messageInput.value.trim();
     if (message === '' || !isConnected) return;
 
-    socket.emit('send_message', { 
+    socket.emit('send_message', {
         message: message,
         type: 'text'
     });
@@ -106,22 +110,22 @@ function compressImage(file, maxWidth = 10000, maxHeight = 10000, quality = 0.8)
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const img = new Image();
-        
-        img.onload = function() {
+
+        img.onload = function () {
             // 计算新的尺寸
             let { width, height } = calculateNewDimensions(img.width, img.height, maxWidth, maxHeight);
-            
+
             canvas.width = width;
             canvas.height = height;
-            
+
             // 绘制压缩后的图片
             ctx.drawImage(img, 0, 0, width, height);
-            
+
             // 转换为base64
             const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
             resolve(compressedDataUrl);
         };
-        
+
         img.src = URL.createObjectURL(file);
     });
 }
@@ -130,18 +134,18 @@ function compressImage(file, maxWidth = 10000, maxHeight = 10000, quality = 0.8)
 function calculateNewDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
     let width = originalWidth;
     let height = originalHeight;
-    
+
     // 如果图片尺寸超过最大值，按比例缩放
     if (width > maxWidth) {
         height = (height * maxWidth) / width;
         width = maxWidth;
     }
-    
+
     if (height > maxHeight) {
         width = (width * maxHeight) / height;
         height = maxHeight;
     }
-    
+
     return { width: Math.round(width), height: Math.round(height) };
 }
 
@@ -152,35 +156,35 @@ async function handleImageFile(file) {
         alert('please select img file');
         return;
     }
-    
+
     // 检查文件大小（最大10MB）
     if (file.size > 100 * 1024 * 1024) {
         alert('img size is too large');
         return;
     }
-    
+
     try {
         // 显示发送中状态
         imageButton.style.opacity = '0.5';
         imageButton.style.pointerEvents = 'none';
-        
+
         // 压缩图片
         const compressedImage = await compressImage(file);
-        
+
         // 发送图片消息
         socket.emit('send_message', {
             message: compressedImage,
             type: 'image'
         });
-        
+
         // 重置按钮状态
         imageButton.style.opacity = '1';
         imageButton.style.pointerEvents = 'auto';
-        
+
     } catch (error) {
         console.error('圖片處理失敗:', error);
         alert('圖片處理失敗，請重試！');
-        
+
         // 重置按钮状态
         imageButton.style.opacity = '1';
         imageButton.style.pointerEvents = 'auto';
@@ -198,14 +202,14 @@ function displayMessage(data, isOwn = false, isSystem = false) {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     } else {
         const messageInfo = isOwn ? `您 ${data.time}` : `${data.username} ${data.time}`;
-        
+
         // let contentHtml = '';
         // if (data.type === 'image') {
         //     contentHtml = `<img src="${data.message}" class="chat-image" onclick="openImageModal('${data.message}')" alt="聊天图片">`;
         // } else {
         //     contentHtml = `<div class="message-content">${data.message}</div>`;
         // }
-        
+
         // messageDiv.innerHTML = `
         //     <div class="message-info">${messageInfo}</div>
         //     ${contentHtml}
@@ -218,25 +222,25 @@ function displayMessage(data, isOwn = false, isSystem = false) {
             img.className = 'chat-image';
             img.alt = '聊天圖片';
             img.onclick = () => openImageModal(data.message);
-            
+
             // 先添加消息框架
             messageDiv.innerHTML = `<div class="message-info">${messageInfo}</div>`;
             messageDiv.appendChild(img);
             messagesDiv.appendChild(messageDiv);
-            
+
             // 立即滚动一次（滚动到消息框架位置）
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
+
             // 监听图片加载完成事件 - 一完成就滚动！
             img.addEventListener('load', () => {
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             });
-            
+
             // 如果图片加载失败，也要滚动
             img.addEventListener('error', () => {
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             });
-            
+
         } else {
             // 文字消息
             messageDiv.innerHTML = `
@@ -246,7 +250,7 @@ function displayMessage(data, isOwn = false, isSystem = false) {
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-    
+
     }
 }
 
@@ -261,11 +265,11 @@ function openImageModal(imageSrc) {
             <img src="${imageSrc}" class="modal-image" alt="放大圖片">
         </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
+
     // 点击关闭按钮或背景关闭模态框
-    modal.onclick = function(e) {
+    modal.onclick = function (e) {
         if (e.target === modal || e.target.className === 'image-modal-close') {
             document.body.removeChild(modal);
         }
@@ -276,15 +280,15 @@ function openImageModal(imageSrc) {
 function updateOnlineUsers(users, count) {
     onlineUsers = users;
     onlineCount.textContent = count;
-    
+
     // 更新用户列表
     usersList.innerHTML = '';
     users.forEach(user => {
         const userItem = document.createElement('div');
         userItem.className = 'user-item';
-        
+
         const isCurrentUser = user.username === currentUsername;
-        
+
         userItem.innerHTML = `
             <div class="user-avatar">${user.username.charAt(0).toUpperCase()}</div>
             <div class="user-info">
@@ -292,7 +296,7 @@ function updateOnlineUsers(users, count) {
                 <div class="user-status">在線中</div>
             </div>
         `;
-        
+
         usersList.appendChild(userItem);
     });
 }
@@ -324,7 +328,7 @@ function closeUsersPanel() {
 function updateTyping() {
     clearTimeout(typingTimer);
     socket.emit('typing', { is_typing: true });
-    
+
     typingTimer = setTimeout(() => {
         socket.emit('typing', { is_typing: false });
     }, 1000);
@@ -338,14 +342,14 @@ function autoResizeTextarea() {
 // 绑定事件监听器
 function bindEventListeners() {
     // 用户名输入框事件
-    usernameInput.addEventListener('keypress', function(e) {
+    usernameInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             joinChat();
         }
     });
 
     // 消息输入框事件
-    messageInput.addEventListener('keypress', function(e) {
+    messageInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault(); // 防止换行
             sendMessage();
@@ -356,7 +360,7 @@ function bindEventListeners() {
 
     // 图片选择事件
     if (imageInput) {
-        imageInput.addEventListener('change', function(e) {
+        imageInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 handleImageFile(file);
@@ -368,20 +372,20 @@ function bindEventListeners() {
 
     // 拖拽上传事件
     if (messageContainer) {
-        messageContainer.addEventListener('dragover', function(e) {
+        messageContainer.addEventListener('dragover', function (e) {
             e.preventDefault();
             messageContainer.classList.add('drag-over');
         });
 
-        messageContainer.addEventListener('dragleave', function(e) {
+        messageContainer.addEventListener('dragleave', function (e) {
             e.preventDefault();
             messageContainer.classList.remove('drag-over');
         });
 
-        messageContainer.addEventListener('drop', function(e) {
+        messageContainer.addEventListener('drop', function (e) {
             e.preventDefault();
             messageContainer.classList.remove('drag-over');
-            
+
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 const file = files[0];
@@ -404,29 +408,31 @@ function bindEventListeners() {
 // Socket.IO 事件监听
 function setupSocketEvents() {
     // 连接成功
-    socket.on('connect', function() {
+    socket.on('connect', function () {
         console.log('連接成功');
+        window.socket.connected = true;
+        isConnected = true;
     });
 
     // 用户加入通知
-    socket.on('user_joined', function(data) {
+    socket.on('user_joined', function (data) {
         displayMessage(data, false, true);
     });
 
-    socket.on('user_left', function(data) {
+    socket.on('user_left', function (data) {
         displayMessage(data, false, true);
     });
-    socket.on('online_users_update', function(data) {
+    socket.on('online_users_update', function (data) {
         updateOnlineUsers(data.users, data.count);
     });
     // 接收消息
-    socket.on('receive_message', function(data) {
+    socket.on('receive_message', function (data) {
         const isOwn = data.username === currentUsername;
         displayMessage(data, isOwn);
     });
 
     // 正在输入提示
-    socket.on('user_typing', function(data) {
+    socket.on('user_typing', function (data) {
         if (data.is_typing) {
             typingIndicator.textContent = `${data.username} 正在输入...`;
             typingIndicator.style.display = 'block';
@@ -436,18 +442,19 @@ function setupSocketEvents() {
     });
 
     // 错误处理
-    socket.on('error', function(data) {
+    socket.on('error', function (data) {
         alert(data.message);
     });
 
     // 连接断开
-    socket.on('disconnect', function() {
+    socket.on('disconnect', function () {
         console.log('連接斷開');
+        window.socket.connected = false;
         isConnected = false;
     });
 
     // 连接错误
-    socket.on('connect_error', function(error) {
+    socket.on('connect_error', function (error) {
         console.error('連接錯誤:', error);
     });
 }
@@ -457,7 +464,7 @@ function initializeApp() {
     initializeElements();
     bindEventListeners();
     setupSocketEvents();
-    
+
     // 聚焦到用户名输入框
     if (usernameInput) {
         usernameInput.focus();

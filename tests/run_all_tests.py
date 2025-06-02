@@ -76,6 +76,7 @@ def main():
     parser.add_argument('--coverage', action='store_true', help='生成覆盖率报告')
     parser.add_argument('--verbose', '-v', action='store_true', help='详细输出')
     parser.add_argument('--resilience', action='store_true', help='斷線测试')
+    parser.add_argument('--a11y', action='store_true', help='無障礙测试')
     
     args = parser.parse_args()
     
@@ -118,6 +119,9 @@ def main():
         
     elif args.resilience:
         success &= run_command("python -m pytest tests/test_resilience.py -v -m resilience", "斷線测试")
+        
+    elif args.a11y:
+        success &= run_command("python -m pytest tests/test_a11y.py -v -m a11y", "無障礙测试")
     
     elif args.coverage:
         # 覆盖率测试
@@ -148,6 +152,8 @@ def main():
         success &= run_command("python -m pytest tests/test_security.py -v", "安全测试")
         
         success &= run_command("python -m pytest tests/test_resilience.py -v", "斷線测试")
+        
+        success &= run_command("python -m pytest tests/test_a11y.py -v", "無障礙测试")
     
     # 总结
     print("\n" + "=" * 50)

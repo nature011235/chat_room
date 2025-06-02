@@ -17,7 +17,8 @@ def test_socketio_reconnect_sync():
 
         # B. 斷線 5 秒
         context.set_offline(True)
-        page.wait_for_function("window.socket.connected === false", timeout=15_000)
+        page.evaluate("window.socket.io.engine.close()")   # 立刻觸發 'disconnect'
+        page.wait_for_function("window.socket.connected === false", timeout=5_000)
 
         # C. 恢復網路
         context.set_offline(False)
