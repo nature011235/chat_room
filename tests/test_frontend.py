@@ -1,8 +1,11 @@
 # tests/test_frontend.py - 前端UI测试（使用fixture版本）
+import base64
 import pytest
 import time
 import sys
 import os
+import shutil
+from selenium.webdriver import ActionChains
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -153,6 +156,127 @@ class TestUserInteraction:
         print(f"最终消息数量: {final_count}")
         
         assert final_count == initial_count, f"空消息不应该被发送，消息数量从 {initial_count} 变为 {final_count}"
+        
+    def test_send_image_message(self, browser, server_url, tmp_path):
+        """測試圖片按鈕選檔後能成功上傳"""
+        browser.get(server_url)
+
+        # 加入聊天室
+        username_input = browser.find_element(By.ID, "usernameInput")
+        username_input.send_keys("圖片按鈕測試")
+        join_button = browser.find_element(By.XPATH, "//button[contains(text(), '加入聊天')]")
+        join_button.click()
+
+        WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.ID, "messageContainer")))
+        time.sleep(1)
+
+        # 準備圖片檔案 (複製一張測試圖片)
+        test_image_src = "detect_img/image-1.png"     # 你提供的測試圖位置
+        test_image = tmp_path / "upload.png"
+        shutil.copy(test_image_src, test_image)
+
+        # 模擬使用者點圖片按鈕 → 選檔
+        image_input = browser.find_element(By.ID, "imageInput")
+        image_input.send_keys(str(test_image.resolve()))
+
+        # 等待圖片訊息出現在 messages 裡
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".message img.chat-image"))
+        )
+        print("✅ 圖片訊息上傳並顯示成功")
+
+    def test_drag_and_drop_image(self, browser, server_url, tmp_path):
+        """測試拖曳圖片上傳功能"""
+        browser.get(server_url)
+
+        # 加入聊天室
+        username_input = browser.find_element(By.ID, "usernameInput")
+        username_input.send_keys("拖曳圖片測試")
+        join_button = browser.find_element(By.XPATH, "//button[contains(text(), '加入聊天')]")
+        join_button.click()
+
+        WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.ID, "messageContainer")))
+        time.sleep(1)
+
+        # 準備圖片檔案
+        test_image_src = "detect_img/image-1.png"
+        test_image = tmp_path / "dragged.png"
+        shutil.copy(test_image_src, test_image)
+
+        # 使用 JS 模擬 drag-and-drop
+        drop_zone = browser.find_element(By.ID, "messageContainer")
+        with open(test_image, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode()
+
+        # 模擬拖放事件
+        browser.execute_script("""
+            const b64 = arguments[0];
+            const filename = arguments[1];
+            const content = atob(b64);
+            const bytes = new Uint8Array(content.length);
+            for (let i = 0; i < content.length; i++) bytes[i] = content.charCodeAt(i);
+
+            const blob = new Blob([bytes], {type: "image/png"});
+            const file = new File([blob], filename, {type: "image/png"});
+
+            const dt = new DataTransfer();
+            dt.items.add(file);
+
+            const dropEvent = new DragEvent('drop', {
+                dataTransfer: dt,
+                bubbles: true,
+                cancelable: true
+            });
+
+            arguments[2].dispatchEvent(dropEvent);
+        """, encoded, test_image.name, drop_zone)
+
+        # 等待圖片出現
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".message img.chat-image"))
+        )
+        print("✅ 拖曳圖片上傳成功")
+        
+    def test_user_join_and_leave_message(self, browser, server_url):
+        """測試使用者加入/離開時系統訊息出現在聊天室"""
+        # 啟動第 1 位使用者（觀察者）
+        browser.get(server_url)
+        username_input = browser.find_element(By.ID, "usernameInput")
+        username_input.send_keys("觀察者")
+        join_button = browser.find_element(By.XPATH, "//button[contains(text(), '加入聊天')]")
+        join_button.click()
+        WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.ID, "messageContainer")))
+
+        # 開第 2 個使用者（加入→離開）
+        from selenium.webdriver import Chrome
+        second = Chrome()  # 要求本地有 chromedriver
+        second.get(server_url)
+        second.find_element(By.ID, "usernameInput").send_keys("系統測試用戶")
+        second.find_element(By.XPATH, "//button[contains(text(), '加入聊天')]").click()
+        WebDriverWait(second, 10).until(EC.visibility_of_element_located((By.ID, "messageContainer")))
+
+        # ✅ 驗證觀察者是否看到 user_joined 系統訊息
+        WebDriverWait(browser, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".message.system"))
+        )
+        system_messages = browser.find_elements(By.CSS_SELECTOR, ".message.system")
+        join_texts = [m.text for m in system_messages if "加入" in m.text]
+        assert any("系統測試用戶" in text for text in join_texts), "未看到使用者加入訊息"
+
+        print("✅ 使用者加入訊息出現")
+
+        # 離線 second user
+        second.quit()
+
+        # ✅ 驗證觀察者是否看到 user_left 系統訊息
+        WebDriverWait(browser, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".message.system"))
+        )
+        system_messages = browser.find_elements(By.CSS_SELECTOR, ".message.system")
+        leave_texts = [m.text for m in system_messages if "離開" in m.text]
+        assert any("系統測試用戶" in text for text in leave_texts), "未看到使用者離開訊息"
+
+        print("✅ 使用者離開訊息出現")
 
 @pytest.mark.ui
 class TestResponsiveDesign:
