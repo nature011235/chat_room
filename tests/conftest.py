@@ -95,3 +95,4 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "ui: 标记为UI测试")
     config.addinivalue_line("markers", "performance: 标记为性能测试")
     config.addinivalue_line("markers", "security: 标记为安全测试")
+    config.addinivalue_line("markers", "resilience: 标记为安全测试")

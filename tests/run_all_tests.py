@@ -75,6 +75,7 @@ def main():
     parser.add_argument('--security', action='store_true', help='只运行安全测试')
     parser.add_argument('--coverage', action='store_true', help='生成覆盖率报告')
     parser.add_argument('--verbose', '-v', action='store_true', help='详细输出')
+    parser.add_argument('--resilience', action='store_true', help='斷線测试')
     
     args = parser.parse_args()
     
@@ -114,6 +115,9 @@ def main():
     elif args.quick:
         # 快速测试：跳过慢速测试
         success &= run_command("python -m pytest tests/ -v -m 'not slow'", "快速测试")
+        
+    elif args.resilience:
+        success &= run_command("python -m pytest tests/test_resilience.py -v -m resilience", "斷線测试")
     
     elif args.coverage:
         # 覆盖率测试
@@ -142,6 +146,8 @@ def main():
         
         # 4. 安全测试
         success &= run_command("python -m pytest tests/test_security.py -v", "安全测试")
+        
+        success &= run_command("python -m pytest tests/test_resilience.py -v", "斷線测试")
     
     # 总结
     print("\n" + "=" * 50)
