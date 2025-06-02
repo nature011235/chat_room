@@ -21,3 +21,56 @@ window.socket = socket;
 
 # 無障礙測試
 
+<body>
+    <header>
+        <div class="chat-header" id="chat-header">
+            <h1>CHAT</h1>
+            <div class="online-status">online</div>
+        </div>
+    </header>
+
+    <main class="chat-container">
+        <div class="online-counter hidden" id="onlineCounter" onclick="toggleUsersPanel()">
+            <span id="onlineCount">0</span> 
+        </div>
+
+        <section class="username-container" id="usernameContainer" aria-label="輸入暱稱區域">
+            <div class="username-form">
+                <label for="usernameInput">暱稱</label>
+                <input type="text" id="usernameInput" placeholder="請輸入您的暱稱..." maxlength="20">
+                <button onclick="joinChat()">加入聊天</button>
+            </div>
+        </section>
+
+        <section class="messages hidden" id="messages" aria-label="訊息列表"></section>
+        <div class="typing-indicator" id="typingIndicator"></div>
+
+        <section class="message-input-container hidden" id="messageContainer" aria-label="訊息輸入區域">
+            <div class="input-buttons">
+                <button onclick="handleImageSelect()" class="image-button" id="imageButton" title="發送圖片"></button>
+            </div>
+            <label for="messageInput" class="visually-hidden">訊息內容</label>
+            <textarea id="messageInput" class="message-input" placeholder="輸入消息..." maxlength="500" rows="1"></textarea>
+            <div class="input-buttons">
+                <button onclick="sendMessage()" class="send-button" id="sendButton" title="發送消息"></button>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            <div class="drag-hint">拖曳圖片到此處發送</div>
+        </section>
+    </main>
+
+    <div class="users-panel-overlay" id="usersPanelOverlay" onclick="closeUsersPanel()"></div>
+
+    <aside class="users-panel" id="usersPanel" role="complementary" aria-label="在線用戶清單">
+        <div class="users-panel-header">
+            <h2 class="users-panel-title">在線用戶</h2> <!-- ← 原 h3 改為 h2 -->
+            <button class="users-panel-close" onclick="closeUsersPanel()">&times;</button>
+        </div>
+        <div class="users-list" id="usersList">
+            <!-- 用户列表将通过JavaScript动态生成 -->
+        </div>
+    </aside>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="static/js/chat.js"></script>
+</body>
