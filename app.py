@@ -15,6 +15,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # 存储在线用户和消息（内存中）
 online_users = {}
 chat_messages = []
+processed_messages = set()
 
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
@@ -123,6 +124,15 @@ def broadcast_online_users(room):
 def handle_message(data):
     if request.sid not in online_users:
         return
+    
+    msg_id = data.get("message_id")
+
+    # 防止 Replay Attack
+    if msg_id in processed_messages:
+        print(f"⚠️ 忽略重複訊息: {msg_id}")
+        return
+
+    processed_messages.add(msg_id)
     
     user_info = online_users[request.sid]
     username = user_info['username']

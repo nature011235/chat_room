@@ -264,3 +264,59 @@ class TestResponseTime:
         # 验证响应时间合理（小于1秒）
         assert avg_response_time < 1.0, f"平均响应时间过长: {avg_response_time:.3f}秒"
         assert max_response_time < 2.0, f"最大响应时间过长: {max_response_time:.3f}秒"
+        
+@pytest.mark.performance
+def test_connection_stability_1h():
+    sio = socketio.Client()
+    sio.connect("http://localhost:5000")
+    assert sio.connected
+
+    start = time.time()
+    duration = 10  # 1 小時，開發時可改成 60
+
+    while time.time() - start < duration:
+        sio.emit("heartbeat", {"time": time.time()})
+        time.sleep(10)
+        assert sio.connected
+
+    sio.disconnect()
+
+import psutil
+import os
+
+@pytest.mark.performance
+def test_memory_and_socket_leak():
+    import gc
+
+    process = psutil.Process(os.getpid())
+    mem_before = process.memory_info().rss
+    sockets_before = process.num_fds() if hasattr(process, 'num_fds') else None
+
+    clients = []
+    for i in range(100):
+        sio = socketio.Client()
+        sio.connect("http://localhost:5000")
+        sio.emit("join", {"username": f"LeakTestUser{i}"})
+        sio.emit("send_message", {"message": f"Hi {i}", "type": "text", "message_id": str(i)})
+        clients.append(sio)
+
+    time.sleep(5)
+
+    for sio in clients:
+        try:
+            sio.disconnect()
+        except Exception:
+            pass
+
+    # 強制釋放 memory / socket
+    del clients
+    gc.collect()
+    time.sleep(10)  # 加長等待時間，讓 socket 關閉生效
+
+    mem_after = process.memory_info().rss
+    sockets_after = process.num_fds() if hasattr(process, 'num_fds') else None
+
+    print(f"🔍 sockets before: {sockets_before}, after: {sockets_after}")
+    assert mem_after - mem_before < 30 * 1024 * 1024
+    if sockets_before is not None:
+        assert sockets_after - sockets_before < 10
