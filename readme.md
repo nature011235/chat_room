@@ -4,7 +4,7 @@ tests 裡面是現在的測試 tests_backup是比較複雜的測試 可以去裡
 
 現在tests 的測試全部都過了 看要不要加新的 
 
-主要就4個元件
+主要就6個元件
 
 * **test_backend  /  [tests_backup] test_chat_app** \
 測後端server：app.py
@@ -14,6 +14,10 @@ tests 裡面是現在的測試 tests_backup是比較複雜的測試 可以去裡
 測效能
 * **test_security**\
 測安全
+* **test_a11y**\
+測無障礙
+* **test_resilience**\
+測連線
 
 ---
 
@@ -46,6 +50,9 @@ python tests/run_all_tests.py --backend     # 後端測試
 python tests/run_all_tests.py --ui          # UI測試
 python tests/run_all_tests.py --performance # 性能測試
 python tests/run_all_tests.py --security    # 安全測試
+python tests/run_all_tests.py --resilience
+python tests/run_all_tests.py --security_replat
+python tests/run_all_tests.py --a11y
 ```
 
 ---
